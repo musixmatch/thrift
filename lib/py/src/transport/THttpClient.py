@@ -23,7 +23,7 @@ class THttpClient(TTransportBase):
     else:
       parsed = urlparse.urlparse(uri)
       self.scheme = parsed.scheme
-      assert self.scheme in ['http', 'https']
+      assert self.scheme in ('http', 'https')
       if self.scheme == 'http':
         self.port = parsed.port or httplib.HTTP_PORT
       elif self.scheme == 'https':
