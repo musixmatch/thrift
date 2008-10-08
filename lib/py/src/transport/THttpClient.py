@@ -14,14 +14,21 @@ class THttpClient(TTransportBase):
 
   """Http implementation of TTransport base."""
 
-  def __init__(self, uri, port=None, path=None):
+  def __init__(self, uri_or_host, port=None, path=None):
+    """THttpClient supports two different types constructor parameters.
+
+    THttpClient(host, port, path)
+    THttpClient(uri)
+
+    Only the second supports https."""
+
     if port is not None:
-      self.host = uri
+      self.host = uri_or_host
       self.port = port
-      self.uri = path
+      self.path = path
       self.scheme = 'http'
     else:
-      parsed = urlparse.urlparse(uri)
+      parsed = urlparse.urlparse(uri_or_host)
       self.scheme = parsed.scheme
       assert self.scheme in ('http', 'https')
       if self.scheme == 'http':
@@ -29,7 +36,7 @@ class THttpClient(TTransportBase):
       elif self.scheme == 'https':
         self.port = parsed.port or httplib.HTTPS_PORT
       self.host = parsed.hostname
-      self.uri = parsed.path
+      self.path = parsed.path
     self.__wbuf = StringIO()
     self.__http = None
 
@@ -58,7 +65,7 @@ class THttpClient(TTransportBase):
     self.__wbuf = StringIO()
 
     # HTTP request
-    self.__http.putrequest('POST', self.uri)
+    self.__http.putrequest('POST', self.path)
 
     # Write headers
     self.__http.putheader('Host', self.host)
