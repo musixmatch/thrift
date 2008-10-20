@@ -350,6 +350,14 @@ void t_cpp_generator::generate_typedef(t_typedef* ttypedef) {
   f_types_ <<
     indent() << "typedef " << type_name(ttypedef->get_type(), true) << " " << ttypedef->get_symbolic() << ";" << endl <<
     endl;
+
+  // XXX delete before commit.
+  std::map<std::string, std::string>::iterator it;
+  for (it = ttypedef->get_type()->annotations_.begin(); it != ttypedef->get_type()->annotations_.end(); ++it) {
+    f_types_ <<
+      indent() << "// " << it->first << " = " << it->second << endl <<
+      endl;
+  }
 }
 
 /**
@@ -625,6 +633,14 @@ void t_cpp_generator::generate_struct_definition(ofstream& out,
     indent() << " public:" << endl <<
     endl;
   indent_up();
+
+  // XXX delete before commit.
+  std::map<std::string, std::string>::iterator it;
+  for (it = tstruct->annotations_.begin(); it != tstruct->annotations_.end(); ++it) {
+    f_types_ <<
+      indent() << "// " << it->first << " = " << it->second << endl <<
+      endl;
+  }
 
   // Put the fingerprint up top for all to see.
   generate_struct_fingerprint(out, tstruct, false);
