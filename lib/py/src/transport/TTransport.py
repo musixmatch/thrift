@@ -286,3 +286,25 @@ class TFramedTransport(TTransportBase):
     buf = pack("!i", wsz) + wout
     self.__trans.write(buf)
     self.__trans.flush()
+
+
+class TFileObjectTransport(TTransportBase):
+  """Wraps a file-like object to make it work as a Thrift transport."""
+
+  def __init__(self, fileobj):
+    self.fileobj = fileobj
+
+  def isOpen(self):
+    return True
+
+  def close(self):
+    self.fileobj.close()
+
+  def read(self, sz):
+    return self.fileobj.read(sz)
+
+  def write(self, buf):
+    self.fileobj.write(buf)
+
+  def flush(self):
+    self.fileobj.flush()
