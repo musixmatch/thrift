@@ -72,6 +72,10 @@ void testField(const Val val) {
     snprintf(errorMessage, ERR_LEN, "Invalid ID (type: %s)", typeid(val).name());
     throw TException(errorMessage);
   }
+  if (fieldType != type) {
+    snprintf(errorMessage, ERR_LEN, "Invalid Field Type (type: %s)", typeid(val).name());
+    throw TException(errorMessage);
+  }
 
   Val out;
   GenericIO::read(protocol, out);
