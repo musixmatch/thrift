@@ -31,7 +31,8 @@ using namespace apache::thrift;
 using namespace apache::thrift::protocol;
 using namespace apache::thrift::transport;
 
-extern char errorMessage[512];
+#define ERR_LEN 512
+extern char errorMessage[ERR_LEN];
 
 template <typename TProto, typename Val>
 void testNaked(Val val) {
@@ -42,7 +43,7 @@ void testNaked(Val val) {
   Val out;
   GenericIO::read(protocol, out);
   if (out != val) {
-    sprintf(errorMessage, "Invalid naked test (type: %s)", ClassNames::getName<Val>());
+    snprintf(errorMessage, ERR_LEN, "Invalid naked test (type: %s)", ClassNames::getName<Val>());
     throw TException(errorMessage);
   }
 }
@@ -68,7 +69,7 @@ void testField(const Val val) {
   protocol->readFieldBegin(name, fieldType, fieldId);
 
   if (fieldId != 15) {
-    sprintf(errorMessage, "Invalid ID (type: %s)", typeid(val).name());
+    snprintf(errorMessage, ERR_LEN, "Invalid ID (type: %s)", typeid(val).name());
     throw TException(errorMessage);
   }
 
@@ -76,7 +77,7 @@ void testField(const Val val) {
   GenericIO::read(protocol, out);
 
   if (out != val) {
-    sprintf(errorMessage, "Invalid value read (type: %s)", typeid(val).name());
+    snprintf(errorMessage, ERR_LEN, "Invalid value read (type: %s)", typeid(val).name());
     throw TException(errorMessage);
   }
 
@@ -201,7 +202,7 @@ void testProtocol(const char* protoname) {
 
     printf("%s => OK\n", protoname);
   } catch (TException e) {
-    sprintf(errorMessage, "%s => Test FAILED: %s", protoname, e.what());
+    snprintf(errorMessage, ERR_LEN, "%s => Test FAILED: %s", protoname, e.what());
     throw TException(errorMessage);
   }
 }

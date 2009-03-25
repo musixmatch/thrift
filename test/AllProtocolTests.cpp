@@ -28,7 +28,7 @@ using namespace apache::thrift;
 using namespace apache::thrift::protocol;
 using namespace apache::thrift::transport;
 
-char errorMessage[512];
+char errorMessage[ERR_LEN];
 
 int main(int argc, char** argv) {
   try {
