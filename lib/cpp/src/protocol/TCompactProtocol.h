@@ -173,8 +173,8 @@ class TCompactProtocol : public TProtocol {
   uint32_t writeCollectionBegin(int8_t elemType, int32_t size);
   uint32_t writeVarint32(uint32_t n);
   uint32_t writeVarint64(uint64_t n);
-  uint64_t i64ToZigZag(const int64_t l);
-  uint32_t i32ToZigZag(const int32_t n);
+  uint64_t i64ToZigzag(const int64_t l);
+  uint32_t i32ToZigzag(const int32_t n);
   inline int8_t getCompactType(int8_t ttype);
 
  public:
@@ -229,8 +229,8 @@ class TCompactProtocol : public TProtocol {
  protected:
   uint32_t readVarint32(int32_t& i32);
   uint32_t readVarint64(int64_t& i64);
-  int32_t zigzagToInt(uint32_t n);
-  int64_t zigzagToLong(uint64_t n);
+  int32_t zigzagToI32(uint32_t n);
+  int64_t zigzagToI64(uint64_t n);
   TType getTType(int8_t type);
 
   // Buffer for reading strings, save for the lifetime of the protocol to

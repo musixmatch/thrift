@@ -188,21 +188,21 @@ uint32_t TCompactProtocol::writeByte(const int8_t byte) {
  * Write an i16 as a zigzag varint.
  */
 uint32_t TCompactProtocol::writeI16(const int16_t i16) {
-  return writeVarint32(i32ToZigZag(i16));
+  return writeVarint32(i32ToZigzag(i16));
 }
 
 /**
  * Write an i32 as a zigzag varint.
  */
 uint32_t TCompactProtocol::writeI32(const int32_t i32) {
-  return writeVarint32(i32ToZigZag(i32));
+  return writeVarint32(i32ToZigzag(i32));
 }
 
 /**
  * Write an i64 as a zigzag varint.
  */
 uint32_t TCompactProtocol::writeI64(const int64_t i64) {
-  return writeVarint64(i64ToZigZag(i64));
+  return writeVarint64(i64ToZigzag(i64));
 }
 
 /**
@@ -323,7 +323,7 @@ uint32_t TCompactProtocol::writeVarint64(uint64_t n) {
  * Convert l into a zigzag long. This allows negative numbers to be
  * represented compactly as a varint.
  */
-uint64_t TCompactProtocol::i64ToZigZag(const int64_t l) {
+uint64_t TCompactProtocol::i64ToZigzag(const int64_t l) {
   return (l << 1) ^ (l >> 63);
 }
 
@@ -331,7 +331,7 @@ uint64_t TCompactProtocol::i64ToZigZag(const int64_t l) {
  * Convert n into a zigzag int. This allows negative numbers to be
  * represented compactly as a varint.
  */
-uint32_t TCompactProtocol::i32ToZigZag(const int32_t n) {
+uint32_t TCompactProtocol::i32ToZigzag(const int32_t n) {
   return (n << 1) ^ (n >> 31);
 }
 
@@ -543,7 +543,7 @@ uint32_t TCompactProtocol::readByte(int8_t& byte) {
 uint32_t TCompactProtocol::readI16(int16_t& i16) {
   int32_t value;
   uint32_t rsize = readVarint32(value);
-  i16 = (int16_t)zigzagToInt(value);
+  i16 = (int16_t)zigzagToI32(value);
   return rsize;
 }
 
@@ -553,7 +553,7 @@ uint32_t TCompactProtocol::readI16(int16_t& i16) {
 uint32_t TCompactProtocol::readI32(int32_t& i32) {
   int32_t value;
   uint32_t rsize = readVarint32(value);
-  i32 = zigzagToInt(value);
+  i32 = zigzagToI32(value);
   return rsize;
 }
 
@@ -563,7 +563,7 @@ uint32_t TCompactProtocol::readI32(int32_t& i32) {
 uint32_t TCompactProtocol::readI64(int64_t& i64) {
   int64_t value;
   uint32_t rsize = readVarint64(value);
-  i64 = zigzagToLong(value);
+  i64 = zigzagToI64(value);
   return rsize;
 }
 
@@ -688,14 +688,14 @@ uint32_t TCompactProtocol::readVarint64(int64_t& i64) {
 /**
  * Convert from zigzag int to int.
  */
-int32_t TCompactProtocol::zigzagToInt(uint32_t n) {
+int32_t TCompactProtocol::zigzagToI32(uint32_t n) {
   return (n >> 1) ^ -(n & 1);
 }
 
 /**
  * Convert from zigzag long to long.
  */
-int64_t TCompactProtocol::zigzagToLong(uint64_t n) {
+int64_t TCompactProtocol::zigzagToI64(uint64_t n) {
   return (n >> 1) ^ -(n & 1);
 }
 
