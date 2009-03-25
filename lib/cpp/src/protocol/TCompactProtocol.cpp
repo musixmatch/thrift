@@ -35,6 +35,12 @@
 # error "TCompactProtocol currenly only works if a signed right shift is arithmetic"
 #endif
 
+#ifdef __GNUC__
+#define UNLIKELY(val) (__builtin_expect((val), 0))
+#else
+#define UNLIKELY(val) (val)
+#endif
+
 namespace apache { namespace thrift { namespace protocol {
 
 const int8_t TCompactProtocol::TTypeToCType[16] = {
@@ -633,19 +639,49 @@ uint32_t TCompactProtocol::readVarint32(int32_t& i32) {
  * if there is another byte to follow. This can read up to 10 bytes.
  */
 uint32_t TCompactProtocol::readVarint64(int64_t& i64) {
-  int32_t shift = 0;
   uint32_t rsize = 0;
-  int8_t b;
+  uint64_t val = 0;
+  int shift = 0;
+  uint8_t buf[10];  // 64 bits / (7 bits/byte) = 10 bytes.
+  uint32_t buf_size = sizeof(buf);
+  const uint8_t* borrowed = trans_->borrow(buf, &buf_size);
 
-  i64 = 0;
-  while (true) {
-    rsize += readByte(b);
-    i64 |= (int64_t) (b & 0x7fL) << shift;
-    if ((b & 0x80) != 0x80)
-      break;
-    shift += 7;
+  // Fast path.
+  if (borrowed != NULL) {
+    while (true) {
+      uint8_t byte = borrowed[rsize];
+      rsize++;
+      val |= (uint64_t)(byte & 0x7f) << shift;
+      shift += 7;
+      if (!(byte & 0x80)) {
+        i64 = val;
+        trans_->consume(rsize);
+        return rsize;
+      }
+      // Have to check for invalid data so we don't crash.
+      if (UNLIKELY(rsize == sizeof(buf))) {
+        throw TProtocolException(TProtocolException::INVALID_DATA, "Variable-length int over 10 bytes.");
+      }
+    }
   }
-  return rsize;
+
+  // Slow path.
+  else {
+    while (true) {
+      uint8_t byte;
+      rsize += trans_->readAll(&byte, 1);
+      val |= (uint64_t)(byte & 0x7f) << shift;
+      shift += 7;
+      if (!(byte & 0x80)) {
+        i64 = val;
+        return rsize;
+      }
+      // Might as well check for invalid data on the slow path too.
+      if (UNLIKELY(rsize >= sizeof(buf))) {
+        throw TProtocolException(TProtocolException::INVALID_DATA, "Variable-length int over 10 bytes.");
+      }
+    }
+  }
 }
 
 /**
