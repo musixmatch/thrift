@@ -175,8 +175,6 @@ class TCompactProtocol : public TProtocol {
   uint32_t writeVarint64(int64_t n);
   int64_t i64ToZigZag(const int64_t l);
   int32_t i32ToZigZag(const int32_t n);
-  void fixedLongToBytes(int64_t n, int8_t* buf, int32_t off);
-  int64_t doubleToLongBits(const double dub);
   int8_t getCompactType(int8_t ttype);
 
  public:
@@ -233,8 +231,6 @@ class TCompactProtocol : public TProtocol {
   uint32_t readVarint64(int64_t& i64);
   int32_t zigzagToInt(int32_t n);
   int64_t zigzagToLong(int64_t n);
-  int64_t bytesToLong(uint8_t* bytes);
-  double longBitsToDouble(int64_t i64);
   TType getTType(int8_t type);
 
   // Buffer for reading strings, save for the lifetime of the protocol to

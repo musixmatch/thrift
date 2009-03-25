@@ -187,9 +187,12 @@ uint32_t TCompactProtocol::writeI64(const int64_t i64) {
  * Write a double to the wire as 8 bytes.
  */
 uint32_t TCompactProtocol::writeDouble(const double dub) {
-  int8_t buf[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-  fixedLongToBytes(doubleToLongBits(dub), buf, 0);
-  trans_->write((uint8_t*)buf, 8);
+  BOOST_STATIC_ASSERT(sizeof(double) == sizeof(uint64_t));
+  BOOST_STATIC_ASSERT(std::numeric_limits<double>::is_iec559);
+
+  uint64_t bits = bitwise_cast<uint64_t>(dub);
+  bits = htolell(bits);
+  trans_->write((uint8_t*)&bits, 8);
   return 8;
 }
 
@@ -308,39 +311,6 @@ int64_t TCompactProtocol::i64ToZigZag(const int64_t l) {
  */
 int32_t TCompactProtocol::i32ToZigZag(const int32_t n) {
   return (n << 1) ^ (n >> 31);
-}
-
-/**
- * Convert a long into little-endian bytes in buf starting at off and going
- * until off+7.
- */
-void TCompactProtocol::fixedLongToBytes(int64_t n, int8_t* buf, int32_t off) {
-  buf[off+0] = (int8_t)( n        & 0xff);
-  buf[off+1] = (int8_t)((n >> 8 ) & 0xff);
-  buf[off+2] = (int8_t)((n >> 16) & 0xff);
-  buf[off+3] = (int8_t)((n >> 24) & 0xff);
-  buf[off+4] = (int8_t)((n >> 32) & 0xff);
-  buf[off+5] = (int8_t)((n >> 40) & 0xff);
-  buf[off+6] = (int8_t)((n >> 48) & 0xff);
-  buf[off+7] = (int8_t)((n >> 56) & 0xff);
-}
-
-int64_t TCompactProtocol::doubleToLongBits(const double dub) {
-  union {
-    double d;
-    int64_t j;
-  } val;
-  int64_t e, f;
-
-  val.d = dub;
-
-  e = val.j & 0x7ff0000000000000LL;
-  f = val.j & 0x000fffffffffffffLL;
-
-  if (e == 0x7ff0000000000000LL && f != 0L)
-    val.j = 0x7ff8000000000000LL;
-
-  return val.j;
 }
 
 /**
@@ -578,9 +548,15 @@ uint32_t TCompactProtocol::readI64(int64_t& i64) {
  * No magic here - just read a double off the wire.
  */
 uint32_t TCompactProtocol::readDouble(double& dub) {
-  uint8_t longBits[8];
-  trans_->readAll(longBits, 8);
-  dub = longBitsToDouble(bytesToLong(longBits));
+  BOOST_STATIC_ASSERT(sizeof(double) == sizeof(uint64_t));
+  BOOST_STATIC_ASSERT(std::numeric_limits<double>::is_iec559);
+
+  uint64_t bits;
+  uint8_t b[8];
+  trans_->readAll(b, 8);
+  bits = *(uint64_t*)b;
+  bits = letohll(bits);
+  dub = bitwise_cast<double>(bits);
   return 8;
 }
 
@@ -668,35 +644,6 @@ int32_t TCompactProtocol::zigzagToInt(int32_t n) {
  */
 int64_t TCompactProtocol::zigzagToLong(int64_t n) {
   return (n >> 1) ^ -(n & 1);
-}
-
-/**
- * Note that it's important that the mask bytes are long literals,
- * otherwise they'll default to ints, and when you shift an int left 56 bits,
- * you just get a messed up int.
- */
-int64_t TCompactProtocol::bytesToLong(uint8_t* bytes) {
-  uint32_t lo = ((bytes[0])
-    | (bytes[1] << 8)
-    | (bytes[2] << 16)
-    | (bytes[3] << 24));
-  uint64_t hi = ((bytes[4])
-    | (bytes[5] << 8)
-    | (bytes[6] << 16)
-    | (bytes[7] << 24));
-
-  return (hi << 32) | lo;
-}
-
-double TCompactProtocol::longBitsToDouble(int64_t i64) {
-  union {
-    double d;
-    int64_t j;
-  } val;
-
-  val.j = i64;
-
-  return val.d;
 }
 
 TType TCompactProtocol::getTType(int8_t type) {
