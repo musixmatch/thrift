@@ -38,6 +38,7 @@ check_PROGRAMS = \
 	DebugProtoTest \
 	JSONProtoTest \
 	OptionalRequiredTest \
+	AllProtocolsTest \
 	UnitTests
 
 TESTS = \
@@ -68,6 +69,14 @@ TPipedTransportTest_SOURCES = \
 
 TPipedTransportTest_LDADD = \
 	$(top_builddir)/lib/cpp/libthrift.la
+
+#
+# AllProtocolsTest
+#
+AllProtocolsTest_SOURCES = \
+	AllProtocolTests.cpp
+
+AllProtocolsTest_LDADD = libtestgencpp.la
 
 #
 # DebugProtoTest
