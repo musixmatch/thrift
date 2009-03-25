@@ -490,7 +490,7 @@ uint32_t TCompactProtocol::readListBegin(TType& elemType,
 
   lsize = (size_and_type >> 4) & 0x0f;
   if (lsize == 15) {
-    rsize = readVarint32(lsize);
+    rsize += readVarint32(lsize);
   }
 
   if (lsize < 0) {
