@@ -391,6 +391,7 @@ uint32_t TCompactProtocol::readStructBegin(std::string& name) {
  * this struct from the field stack.
  */
 uint32_t TCompactProtocol::readStructEnd() {
+  lastFieldId_ = lastField_.top();
   lastField_.pop();
   return 0;
 }
