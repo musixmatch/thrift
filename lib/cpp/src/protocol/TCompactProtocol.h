@@ -175,7 +175,7 @@ class TCompactProtocol : public TProtocol {
   uint32_t writeVarint64(uint64_t n);
   uint64_t i64ToZigZag(const int64_t l);
   uint32_t i32ToZigZag(const int32_t n);
-  int8_t getCompactType(int8_t ttype);
+  inline int8_t getCompactType(int8_t ttype);
 
  public:
   uint32_t readMessageBegin(std::string& name,
