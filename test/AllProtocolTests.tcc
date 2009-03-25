@@ -20,6 +20,8 @@
 #ifndef _THRIFT_TEST_GENERICPROTOCOLTEST_TCC_
 #define _THRIFT_TEST_GENERICPROTOCOLTEST_TCC_ 1
 
+#include <limits>
+
 #include <protocol/TBinaryProtocol.h>
 #include <transport/TBufferTransports.h>
 #include <Thrift.h>
@@ -141,6 +143,8 @@ void testProtocol(const char* protoname) {
     testNaked<TProto, int16_t>((int16_t)-1);
     testNaked<TProto, int16_t>((int16_t)-15000);
     testNaked<TProto, int16_t>((int16_t)-0x7fff);
+    testNaked<TProto, int16_t>(std::numeric_limits<int16_t>::min());
+    testNaked<TProto, int16_t>(std::numeric_limits<int16_t>::max());
 
     testField<TProto, T_I16, int16_t>((int16_t)0);
     testField<TProto, T_I16, int16_t>((int16_t)1);
@@ -161,6 +165,8 @@ void testProtocol(const char* protoname) {
     testNaked<TProto, int32_t>(-1);
     testNaked<TProto, int32_t>(-15000);
     testNaked<TProto, int32_t>(-0xffff);
+    testNaked<TProto, int32_t>(std::numeric_limits<int32_t>::min());
+    testNaked<TProto, int32_t>(std::numeric_limits<int32_t>::max());
 
     testField<TProto, T_I32, int32_t>(0);
     testField<TProto, T_I32, int32_t>(1);
@@ -176,6 +182,13 @@ void testProtocol(const char* protoname) {
     testField<TProto, T_I32, int32_t>(-15000);
     testField<TProto, T_I32, int32_t>(-0xffff);
     testField<TProto, T_I32, int32_t>(-0xffffff);
+    testNaked<TProto, int64_t>(std::numeric_limits<int32_t>::min());
+    testNaked<TProto, int64_t>(std::numeric_limits<int32_t>::max());
+    testNaked<TProto, int64_t>(std::numeric_limits<int32_t>::min() + 10);
+    testNaked<TProto, int64_t>(std::numeric_limits<int32_t>::max() - 16);
+    testNaked<TProto, int64_t>(std::numeric_limits<int64_t>::min());
+    testNaked<TProto, int64_t>(std::numeric_limits<int64_t>::max());
+
 
     testNaked<TProto, int64_t>(0);
     for (int64_t i = 0; i < 62; i++) {

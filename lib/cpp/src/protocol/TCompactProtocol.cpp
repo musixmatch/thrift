@@ -260,7 +260,7 @@ uint32_t TCompactProtocol::writeCollectionBegin(int8_t elemType, int32_t size) {
 /**
  * Write an i32 as a varint. Results in 1-5 bytes on the wire.
  */
-uint32_t TCompactProtocol::writeVarint32(int32_t n) {
+uint32_t TCompactProtocol::writeVarint32(uint32_t n) {
   uint8_t buf[5];
   uint32_t wsize = 0;
 
@@ -280,7 +280,7 @@ uint32_t TCompactProtocol::writeVarint32(int32_t n) {
 /**
  * Write an i64 as a varint. Results in 1-10 bytes on the wire.
  */
-uint32_t TCompactProtocol::writeVarint64(int64_t n) {
+uint32_t TCompactProtocol::writeVarint64(uint64_t n) {
   uint8_t buf[10];
   uint32_t wsize = 0;
 
@@ -301,7 +301,7 @@ uint32_t TCompactProtocol::writeVarint64(int64_t n) {
  * Convert l into a zigzag long. This allows negative numbers to be
  * represented compactly as a varint.
  */
-int64_t TCompactProtocol::i64ToZigZag(const int64_t l) {
+uint64_t TCompactProtocol::i64ToZigZag(const int64_t l) {
   return (l << 1) ^ (l >> 63);
 }
 
@@ -309,7 +309,7 @@ int64_t TCompactProtocol::i64ToZigZag(const int64_t l) {
  * Convert n into a zigzag int. This allows negative numbers to be
  * represented compactly as a varint.
  */
-int32_t TCompactProtocol::i32ToZigZag(const int32_t n) {
+uint32_t TCompactProtocol::i32ToZigZag(const int32_t n) {
   return (n << 1) ^ (n >> 31);
 }
 
@@ -394,7 +394,7 @@ uint32_t TCompactProtocol::readFieldBegin(std::string& name,
   }
 
   // mask off the 4 MSB of the type header. it could contain a field id delta.
-  int16_t modifier = (int16_t)((byte & 0xf0) >> 4);
+  int16_t modifier = (int16_t)(((uint8_t)byte & 0xf0) >> 4);
   if (modifier == 0) {
     // not a delta, look ahead for the zigzag varint field id.
     rsize += readI16(fieldId);
@@ -437,8 +437,8 @@ uint32_t TCompactProtocol::readMapBegin(TType& keyType,
     throw TProtocolException(TProtocolException::SIZE_LIMIT);
   }
 
-  keyType = getTType((int8_t)(kvType >> 4));
-  valType = getTType((int8_t)(kvType & 0xf));
+  keyType = getTType((int8_t)((uint8_t)kvType >> 4));
+  valType = getTType((int8_t)((uint8_t)kvType & 0xf));
   size = (uint32_t)msize;
 
   return rsize;
@@ -458,7 +458,7 @@ uint32_t TCompactProtocol::readListBegin(TType& elemType,
 
   rsize += readByte(size_and_type);
 
-  lsize = (size_and_type >> 4) & 0x0f;
+  lsize = ((uint8_t)size_and_type >> 4) & 0x0f;
   if (lsize == 15) {
     rsize += readVarint32(lsize);
   }
@@ -635,14 +635,14 @@ uint32_t TCompactProtocol::readVarint64(int64_t& i64) {
 /**
  * Convert from zigzag int to int.
  */
-int32_t TCompactProtocol::zigzagToInt(int32_t n) {
+int32_t TCompactProtocol::zigzagToInt(uint32_t n) {
   return (n >> 1) ^ -(n & 1);
 }
 
 /**
  * Convert from zigzag long to long.
  */
-int64_t TCompactProtocol::zigzagToLong(int64_t n) {
+int64_t TCompactProtocol::zigzagToLong(uint64_t n) {
   return (n >> 1) ^ -(n & 1);
 }
 
